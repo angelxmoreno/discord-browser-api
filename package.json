@@ -38,7 +38,8 @@
         "check": "bun run lint:fix && bun run typecheck && bun run build && bun run test"
     },
     "dependencies": {
-        "axios": "^1.11.0"
+        "axios": "^1.11.0",
+        "discord-api-types": "^0.38.20"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.2.0",
