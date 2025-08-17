@@ -1,11 +1,54 @@
 {
-  "name": "discord-browser-api",
-  "module": "src/index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+    "name": "discord-browser-api",
+    "version": "0.1.0",
+    "description": "Browser-compatible Discord API client for OAuth2 user authentication and REST API interactions",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "keywords": [
+        "discord",
+        "api",
+        "oauth2",
+        "browser",
+        "web",
+        "client"
+    ],
+    "author": "Angel S. Moreno <angelxmoreno@gmail.com>",
+    "license": "MIT",
+    "private": false,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/angelxmoreno/discord-browser-api"
+    },
+    "scripts": {
+        "clean": "rm -rf node_modules bun.lock && bun install",
+        "postinstall": "lefthook install",
+        "prebuild": "rimraf dist && bun run scripts/generate-endpoints.ts",
+        "build": "tsc",
+        "prepublishOnly": "bun run test && bun run lint",
+        "dev": "bun run build --watch",
+        "test": "bun test",
+        "test:watch": "bun test --watch",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write",
+        "typecheck": "tsc --noEmit",
+        "check": "bun run lint:fix && bun run typecheck && bun run build && bun run test"
+    },
+    "dependencies": {
+        "axios": "^1.11.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.2.0",
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
+        "@types/bun": "^1.2.20",
+        "lefthook": "^1.12.3",
+        "rimraf": "^6.0.1"
+    },
+    "peerDependencies": {
+        "typescript": "^5.9.2"
+    }
 }
