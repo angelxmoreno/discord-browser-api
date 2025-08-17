@@ -647,8 +647,10 @@ Create practical examples in `examples/` directory showing:
 
 ### Phase 4: Build & Release
 
+The release process will be managed by **release-please** to automate versioning, changelog generation, and the creation of GitHub releases.
+
 #### Task 4.1: Configure GitHub Actions
-Create CI/CD pipeline for testing and releasing.
+Create CI/CD pipeline for testing and releasing. The `release.yml` workflow will use `release-please` to manage the release process based on Conventional Commits.
 
 #### Task 4.2: Prepare for NPM
 - Final package.json configuration
