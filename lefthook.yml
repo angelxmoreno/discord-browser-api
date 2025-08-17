@@ -17,4 +17,4 @@ commit-msg:
   parallel: true
   commands:
     commitlint:
-      run: bunx commitlint --edit $1
+      run: bunx commitlint --edit {1}

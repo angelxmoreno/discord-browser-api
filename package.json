@@ -24,8 +24,8 @@
         "url": "https://github.com/angelxmoreno/discord-browser-api"
     },
     "scripts": {
-        "clean": "rm -rf node_modules bun.lock && bun install",
-        "postinstall": "lefthook install",
+        "clean": "rimraf node_modules bun.lockb && bun install",
+        "prepare": "lefthook install",
         "prebuild": "rimraf dist && bun run scripts/generate-endpoints.ts",
         "build": "tsc",
         "prepublishOnly": "bun run test && bun run lint",
@@ -34,6 +34,7 @@
         "test:watch": "bun test --watch",
         "lint": "biome check .",
         "lint:fix": "biome check --write",
+        "lint:commits": "commitlint --from=origin/main --to=HEAD --verbose",
         "typecheck": "tsc --noEmit",
         "check": "bun run lint:fix && bun run typecheck && bun run build && bun run test"
     },
@@ -47,7 +48,8 @@
         "@commitlint/config-conventional": "^19.8.1",
         "@types/bun": "^1.2.20",
         "lefthook": "^1.12.3",
-        "rimraf": "^6.0.1"
+        "rimraf": "^6.0.1",
+        "typescript": "^5.9.2"
     },
     "peerDependencies": {
         "typescript": "^5.9.2"

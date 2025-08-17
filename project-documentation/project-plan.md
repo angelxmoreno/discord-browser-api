@@ -662,6 +662,25 @@ Create CI/CD pipeline for testing and releasing. The `release.yml` workflow will
 - NPM publication
 - GitHub release with examples
 
+### Phase 5: Quality, Security & Automation
+
+To ensure the long-term health, security, and maintainability of the package, we will integrate the following services:
+
+#### Task 5.1: Configure Code Coverage Reporting
+- **Tool**: Codecov
+- **Action**: Integrate `codecov/codecov-action` into the `pr-check.yml` workflow.
+- **Goal**: Upload coverage reports on every PR to track test coverage over time and enforce quality standards. A coverage badge will be added to the `README.md`.
+
+#### Task 5.2: Configure Dependency Management
+- **Tool**: Dependabot
+- **Action**: Enable Dependabot in the GitHub repository settings and add a `.github/dependabot.yml` file.
+- **Goal**: Automatically create pull requests to keep all `npm` dependencies up-to-date, patching security vulnerabilities and maintaining a modern codebase.
+
+#### Task 5.3: Configure Static Security Analysis (SAST)
+- **Tool**: GitHub Code Scanning (CodeQL)
+- **Action**: Add the `CodeQL` GitHub Actions workflow to the project.
+- **Goal**: Proactively scan the codebase for common security vulnerabilities and coding errors on every push and pull request.
+
 ## Post-V1 Roadmap
 
 ### Future Features (Document but don't implement)
