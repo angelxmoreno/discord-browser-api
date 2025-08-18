@@ -25,7 +25,7 @@ The primary goal is to create a browser-focused Discord API client library using
     -   Fix: `bun run lint:fix`
     -   Format: `bun run format`
 -   **Build**: `bun run build` (This also runs the endpoint generation script)
--   **Endpoint Generation**: Endpoints are generated automatically from `src/endpoints/config.ts` by running `bun run build` or `bun run scripts/generate-endpoints.ts`. Do not edit generated endpoint files directly.
+-   **Endpoint Generation**: Endpoints are generated automatically from `src/endpoints/endpointConfig.ts` by running `bun run build` or `bun run scripts/generate-endpoints.ts`. Do not edit generated endpoint files directly.
 
 ## 4. Coding Style & Conventions
 
@@ -56,5 +56,5 @@ All commit messages MUST adhere to the [Conventional Commits specification](http
 -   `tsconfig.json`: TypeScript compiler configuration.
 -   `biome.json`: Linter and formatter rules (Biome v2 standard).
 -   `lefthook.yml`: Git hook configurations.
--   `src/endpoints/config.ts`: The source of truth for all API endpoints. Modify this file to add or change endpoints.
+-   `src/endpoints/endpointConfig.ts`: The source of truth for all API endpoints. Modify this file to add or change endpoints.
 -   `src/client/DiscordWebClient.ts`: The main client class.
