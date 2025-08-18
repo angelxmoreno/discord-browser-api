@@ -36,7 +36,7 @@
         "lint:fix": "biome check --write",
         "lint:commits": "commitlint --from=origin/main --to=HEAD --verbose",
         "typecheck": "tsc --noEmit",
-        "check": "bun run lint:fix && bun run typecheck && bun run build && bun run test"
+        "check": "bun run typecheck && bun run build && bun run test && bun run lint:fix"
     },
     "dependencies": {
         "axios": "^1.11.0",
@@ -47,11 +47,9 @@
         "@commitlint/cli": "^19.8.1",
         "@commitlint/config-conventional": "^19.8.1",
         "@types/bun": "^1.2.20",
+        "axios-mock-adapter": "^2.1.0",
         "lefthook": "^1.12.3",
         "rimraf": "^6.0.1",
-        "typescript": "^5.9.2"
-    },
-    "peerDependencies": {
         "typescript": "^5.9.2"
     }
 }

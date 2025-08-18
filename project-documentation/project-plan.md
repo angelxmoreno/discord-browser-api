@@ -39,7 +39,7 @@ discord-browser-api/
 │   │   └── index.ts
 │   ├── endpoints/
 │   │   ├── generator.ts             # Endpoint generator script
-│   │   ├── config.ts                # Endpoint definitions
+│   │   ├── endpointConfig.ts                # Endpoint definitions
 │   │   ├── users.ts                 # Generated user endpoints
 │   │   ├── guilds.ts                # Generated guild endpoints
 │   │   └── index.ts
@@ -270,26 +270,34 @@ export default {
 Create `src/types/client.ts`:
 ```typescript
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { OAuth2Scopes } from 'discord-api-types/v10';
 
 export interface DiscordBrowserApiClientOptions {
-  /** Custom axios instance with user configurations */
+  /**
+   * A pre-configured Axios instance. If provided, all other Axios-related options are ignored.
+   */
   axiosInstance?: AxiosInstance;
-  /** Discord API base URL */
+  /**
+   * A custom Axios request configuration object to be used when creating a new instance.
+   * This is ignored if `axiosInstance` is provided.
+   */
+  axiosConfig?: AxiosRequestConfig;
+  /** The base URL for the Discord API. This is a shortcut for `axiosConfig.baseURL`. */
   baseURL?: string;
-  /** API version */
-  version?: string;
-  /** Default request timeout */
+  /** The request timeout in milliseconds. This is a shortcut for `axiosConfig.timeout`. */
   timeout?: number;
+  /** The API version to use. Defaults to 'v10'. */
+  version?: string;
 }
 
 export interface OAuth2Config {
   clientId: string;
   redirectUri: string;
-  scopes: string[];
+  scopes: OAuth2Scopes[];
   state?: string;
 }
 
-export interface TokenInfo {
+export interface BrowserTokenInfo {
   accessToken: string;
   tokenType: 'Bearer';
   expiresIn?: number;
@@ -338,32 +346,39 @@ export class OAuth2Error extends Error {
 #### Task 2.3: Create OAuth2 Helper
 Create `src/oauth/OAuth2Helper.ts`:
 ```typescript
-import type { OAuth2Config } from '../types/client.js';
-import { OAuth2Error } from '../errors/index.js';
+import type { OAuth2Config, BrowserTokenInfo } from '../types/client';
+import { OAuth2Error } from '../errors/index';
 
-export class OAuth2Helper {
-  private static readonly OAUTH_BASE_URL = 'https://discord.com/oauth2/authorize';
-  private static readonly TOKEN_URL = 'https://discord.com/api/oauth2/token';
+const OAUTH_BASE_URL = 'https://discord.com/oauth2/authorize';
 
+/**
+ * A collection of utility functions for handling the Discord OAuth2 flow.
+ */
+export const OAuth2Helper = {
   /**
-   * Generate OAuth2 authorization URL
+   * Generates the Discord OAuth2 authorization URL.
+   * @param config - The configuration for the authorization URL.
+   * @returns The fully formed authorization URL.
    */
-  static generateAuthUrl(config: OAuth2Config): string {
+  generateAuthUrl: (config: OAuth2Config): string => {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.clientId,
       redirect_uri: config.redirectUri,
       scope: config.scopes.join(' '),
-      ...(config.state && { state: config.state })
+      ...(config.state && { state: config.state }),
     });
 
-    return `${this.OAUTH_BASE_URL}?${params.toString()}`;
-  }
+    return `${OAUTH_BASE_URL}?${params.toString()}`;
+  },
 
   /**
-   * Parse authorization code from callback URL
+   * Parses the authorization code from a callback URL.
+   * @param url - The callback URL from Discord.
+   * @returns An object containing the authorization code and optional state.
+   * @throws {OAuth2Error} If the URL contains an error or is missing the code.
    */
-  static parseCallbackUrl(url: string): { code: string; state?: string } {
+  parseCallbackUrl: (url: string): { code: string; state?: string } => {
     const urlObj = new URL(url);
     const code = urlObj.searchParams.get('code');
     const error = urlObj.searchParams.get('error');
@@ -379,15 +394,18 @@ export class OAuth2Helper {
     }
 
     return { code, state: state || undefined };
-  }
+  },
 
   /**
-   * Extract access token from implicit grant callback
+   * Parses the access token from an implicit grant callback URL fragment.
+   * @param url - The callback URL from Discord, including the hash fragment.
+   * @returns A BrowserTokenInfo object.
+   * @throws {OAuth2Error} If the URL contains an error or is missing the token.
    */
-  static parseImplicitCallback(url: string): TokenInfo {
+  parseImplicitCallback: (url: string): BrowserTokenInfo => {
     const fragment = new URL(url).hash.substring(1);
     const params = new URLSearchParams(fragment);
-    
+
     const accessToken = params.get('access_token');
     const error = params.get('error');
 
@@ -404,14 +422,14 @@ export class OAuth2Helper {
       accessToken,
       tokenType: 'Bearer' as const,
       expiresIn: params.get('expires_in') ? Number(params.get('expires_in')) : undefined,
-      scope: params.get('scope') || undefined
+      scope: params.get('scope') || undefined,
     };
-  }
-}
+  },
+};
 ```
 
 #### Task 2.4: Create Endpoint Configuration
-Create `src/endpoints/config.ts`:
+Create `src/endpoints/endpointConfig.ts`:
 ```typescript
 import type {
   RESTGetAPICurrentUserResult,
@@ -478,7 +496,7 @@ export const endpointConfigs = {
 Create `scripts/generate-endpoints.ts`:
 ```typescript
 import { writeFileSync } from 'fs';
-import { endpointConfigs } from '../src/endpoints/config.js';
+import { endpointConfigs } from '../src/endpoints/config';
 
 function generateEndpointClass(category: string, endpoints: Record<string, any>): string {
   const methods = Object.entries(endpoints).map(([name, config]) => {
@@ -540,31 +558,25 @@ console.log('Endpoints generated successfully!');
 #### Task 2.6: Create Main Client Class
 Create `src/client/DiscordBrowserApiClient.ts`:
 ```typescript
-import axios, { type AxiosInstance, type AxiosError } from 'axios';
-import type { DiscordBrowserApiClientOptions, TokenInfo } from '../types/client.js';
-import { DiscordAPIError } from '../errors/index.js';
-import { UsersEndpoints } from '../endpoints/users.js';
-import { GuildsEndpoints } from '../endpoints/guilds.js';
-import { ChannelsEndpoints } from '../endpoints/channels.js';
+import { type AxiosInstance, type AxiosError } from 'axios';
+import type { DiscordBrowserApiClientOptions, BrowserTokenInfo } from '../types/client';
+import { DiscordAPIError } from '../errors';
+import { UsersEndpoints } from '../endpoints/users';
+import { GuildsEndpoints } from '../endpoints/guilds';
+import { ChannelsEndpoints } from '../endpoints/channels';
+import { createHttpClient } from '../utils/httpClient';
 
 export class DiscordBrowserApiClient {
-  private httpClient: AxiosInstance;
-  private accessToken?: string;
+  protected readonly httpClient: AxiosInstance;
+  protected accessToken?: string;
 
   // Endpoint categories
   public readonly users: UsersEndpoints;
-  public readonly guilds: GuildsEndpoints; 
+  public readonly guilds: GuildsEndpoints;
   public readonly channels: ChannelsEndpoints;
 
   constructor(options: DiscordBrowserApiClientOptions = {}) {
-    // Create or use provided axios instance
-    this.httpClient = options.axiosInstance || axios.create({
-      baseURL: options.baseURL || `https://discord.com/api/${options.version || 'v10'}`,
-      timeout: options.timeout || 10000,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    this.httpClient = createHttpClient(options);
 
     // Add response interceptor for error handling
     this.httpClient.interceptors.response.use(
@@ -579,16 +591,17 @@ export class DiscordBrowserApiClient {
   }
 
   /**
-   * Set the access token for API requests
+   * Set the access token for API requests.
+   * @param tokenInfo - The token information object or a raw access token string.
    */
-  setAccessToken(tokenInfo: TokenInfo | string): void {
+  setAccessToken(tokenInfo: BrowserTokenInfo | string): void {
     const token = typeof tokenInfo === 'string' ? tokenInfo : tokenInfo.accessToken;
     this.accessToken = token;
     this.httpClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
   /**
-   * Clear the access token
+   * Clears the access token from the client.
    */
   clearAccessToken(): void {
     this.accessToken = undefined;
@@ -596,25 +609,27 @@ export class DiscordBrowserApiClient {
   }
 
   /**
-   * Get current access token
+   * Gets the current access token.
+   * @returns The access token or undefined if not set.
    */
   getAccessToken(): string | undefined {
     return this.accessToken;
   }
 
   /**
-   * Check if client is authenticated
+   * Checks if the client has an access token.
+   * @returns True if an access token is set, false otherwise.
    */
   isAuthenticated(): boolean {
     return !!this.accessToken;
   }
 
-  private handleResponseError(error: AxiosError): Promise<never> {
+  protected handleResponseError(error: AxiosError): Promise<never> {
     if (error.response) {
       const { status, data, config } = error.response;
       const message = (data as any)?.message || error.message;
       const code = (data as any)?.code || 0;
-      
+
       throw new DiscordAPIError(
         message,
         code,
@@ -623,7 +638,7 @@ export class DiscordBrowserApiClient {
         config?.url || 'UNKNOWN'
       );
     }
-    
+
     throw error;
   }
 }
