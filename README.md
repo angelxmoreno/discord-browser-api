@@ -50,7 +50,7 @@ This project uses [Bun](https://bun.sh) as its runtime and package manager.
 ```
 discord-browser-api/
 ├── src/
-│   ├── client/                     # Main client class
+│   ├── DiscordBrowserApiClient.ts  # Main client class
 │   ├── endpoints/                  # Auto-generated API endpoints
 │   ├── errors/                     # Custom error classes
 │   ├── oauth/                      # OAuth2 utilities

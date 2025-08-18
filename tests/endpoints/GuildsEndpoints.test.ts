@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import type { RESTGetAPIGuildResult } from 'discord-api-types/v10';
 import { GuildsEndpoints } from '../../src/endpoints/guilds';
@@ -7,7 +7,7 @@ import { GuildsEndpoints } from '../../src/endpoints/guilds';
 describe('GuildsEndpoints', () => {
     let guildsEndpoints: GuildsEndpoints;
     let mockAdapter: MockAdapter;
-    let axiosInstance: typeof axios;
+    let axiosInstance: AxiosInstance;
 
     // Define mock data at the top level so it's accessible throughout
     const mockGuildData: RESTGetAPIGuildResult = {

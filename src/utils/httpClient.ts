@@ -23,9 +23,9 @@ export const createHttpClient = (options: ApiClientOptions = {}): AxiosInstance 
             'Content-Type': 'application/json',
             ...options.axiosConfig?.headers, // Ensure our required headers are merged
         },
-        // Let shortcut options override anything else
-        ...(options.baseURL && { baseURL: options.baseURL }),
-        ...(options.timeout && { timeout: options.timeout }),
+        // Let shortcut options override anything else - check for undefined to allow falsy values
+        ...(options.baseURL !== undefined && { baseURL: options.baseURL }),
+        ...(options.timeout !== undefined && { timeout: options.timeout }),
     };
 
     return axios.create(mergedConfig);

@@ -80,9 +80,10 @@ function generateEndpointClass(category: string, endpoints: Record<string, Endpo
     // Extract generation configs for each endpoint
     const generationConfigs: GenerationConfig[] = Object.entries(endpoints).map(([name, config]) => {
         const pathParams = extractPathParams(config.path);
-        const hasRequiredParams = Object.keys(config.options || {}).some(
-            (key) => !config.optionsType.includes(`${key}?`)
-        );
+        // Path parameters always make the options required, fallback to checking optionsType
+        const hasRequiredParams =
+            pathParams.length > 0 ||
+            Object.keys(config.options || {}).some((key) => !config.optionsType.includes(`${key}?`));
 
         return {
             methodName: name,

@@ -18,7 +18,7 @@ export const OAuth2Helper = {
             client_id: config.clientId,
             redirect_uri: config.redirectUri,
             scope: config.scopes.join(' '),
-            ...(config.state && { state: config.state }),
+            ...(config.state ? { state: config.state } : {}),
         });
 
         return `${OAUTH_BASE_URL}?${params.toString()}`;

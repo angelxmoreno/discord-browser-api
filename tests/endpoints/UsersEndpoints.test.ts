@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
-import axios from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import type { RESTGetAPICurrentUserGuildsResult, RESTGetAPICurrentUserResult } from 'discord-api-types/v10';
 import { UsersEndpoints } from '../../src/endpoints/users';
@@ -7,7 +7,7 @@ import { UsersEndpoints } from '../../src/endpoints/users';
 describe('UsersEndpoints', () => {
     let usersEndpoints: UsersEndpoints;
     let mockAdapter: MockAdapter;
-    let axiosInstance: typeof axios;
+    let axiosInstance: AxiosInstance;
 
     beforeEach(() => {
         axiosInstance = axios.create({

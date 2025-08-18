@@ -32,7 +32,7 @@ export class GuildsEndpoints {
     /**
      * Get guild
      */
-    async getGuild(options?: { guildId: string; with_counts?: boolean }): Promise<RESTGetAPIGuildResult> {
+    async getGuild(options: { guildId: string; with_counts?: boolean }): Promise<RESTGetAPIGuildResult> {
         // biome-ignore lint/correctness/noUnusedVariables: Path parameters are intentionally extracted but not used
         const { guildId, ...requestParams } = options || {};
         const path = this.resolvePath('/guilds/{guild.id}', options);
