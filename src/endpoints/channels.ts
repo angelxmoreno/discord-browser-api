@@ -8,9 +8,19 @@ export class ChannelsEndpoints {
         let resolvedPath = path;
 
         if (options) {
-            // Replace path parameters like {guild.id} with actual values
+            // Replace path parameters like {guild.id} with actual values from options
+            // Map option keys to path placeholders (e.g., guildId -> {guild.id})
+            const paramMappings: Record<string, string> = {
+                guildId: 'guild.id',
+                channelId: 'channel.id',
+                userId: 'user.id',
+                messageId: 'message.id',
+                roleId: 'role.id',
+            };
+
             Object.entries(options).forEach(([key, value]) => {
-                const placeholder = `{${key}}`;
+                const pathParam = paramMappings[key] || key;
+                const placeholder = `{${pathParam}}`;
                 if (resolvedPath.includes(placeholder)) {
                     resolvedPath = resolvedPath.replace(placeholder, String(value));
                 }
@@ -19,13 +29,17 @@ export class ChannelsEndpoints {
 
         return resolvedPath;
     }
-
+    /**
+     * Get channel
+     */
     async getChannel(options?: { channelId: string }): Promise<RESTGetAPIChannelResult> {
+        // biome-ignore lint/correctness/noUnusedVariables: Path parameters are intentionally extracted but not used
+        const { channelId, ...requestParams } = options || {};
         const path = this.resolvePath('/channels/{channel.id}', options);
         const response = await this.client.request({
             method: 'GET',
             url: path,
-            params: options,
+            params: requestParams,
         });
         return response.data;
     }
