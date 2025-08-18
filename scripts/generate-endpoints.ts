@@ -57,16 +57,31 @@ function generateMethod(config: GenerationConfig): string {
     const hasPathParams = pathParams.length > 0;
     const pathParamKeys = pathParams.map((p) => getParameterMapping(p));
 
-    const paramsLogic = hasPathParams
-        ? `    // biome-ignore lint/correctness/noUnusedVariables: Path parameters are intentionally extracted but not used\n    const { ${pathParamKeys.join(', ')}, ...requestParams } = options || {};`
-        : '    const requestParams = options;';
+    let paramsLogic: string;
+    let pathResolution: string;
+
+    if (hasPathParams) {
+        // For endpoints with path parameters
+        const pathParamValidation = pathParamKeys
+            .map((key) => `    if (!${key}) {\n        throw new Error('${key} is required');\n    }`)
+            .join('\n');
+
+        const pathParamsObject = `{ ${pathParamKeys.join(', ')} }`;
+
+        paramsLogic = `    const { ${pathParamKeys.join(', ')}, ...requestParams } = options;\n    \n${pathParamValidation}`;
+        pathResolution = `    const path = this.resolvePath('${path}', ${pathParamsObject});`;
+    } else {
+        // For endpoints without path parameters
+        paramsLogic = '    const requestParams = options;';
+        pathResolution = `    const path = this.resolvePath('${path}', options);`;
+    }
 
     const requestData = method === 'GET' ? 'params: requestParams' : 'data: requestParams';
 
     return `${jsdoc}
   async ${methodName}(options${optionalParams}: ${optionsType}): Promise<${returnsType}> {
 ${paramsLogic}
-    const path = this.resolvePath('${path}', options);
+${pathResolution}
     const response = await this.client.request({
       method: '${method}',
       url: path,

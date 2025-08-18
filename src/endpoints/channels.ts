@@ -33,9 +33,12 @@ export class ChannelsEndpoints {
      * Get channel
      */
     async getChannel(options: { channelId: string }): Promise<RESTGetAPIChannelResult> {
-        // biome-ignore lint/correctness/noUnusedVariables: Path parameters are intentionally extracted but not used
-        const { channelId, ...requestParams } = options || {};
-        const path = this.resolvePath('/channels/{channel.id}', options);
+        const { channelId, ...requestParams } = options;
+
+        if (!channelId) {
+            throw new Error('channelId is required');
+        }
+        const path = this.resolvePath('/channels/{channel.id}', { channelId });
         const response = await this.client.request({
             method: 'GET',
             url: path,

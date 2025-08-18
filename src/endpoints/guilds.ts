@@ -33,9 +33,12 @@ export class GuildsEndpoints {
      * Get guild
      */
     async getGuild(options: { guildId: string; with_counts?: boolean }): Promise<RESTGetAPIGuildResult> {
-        // biome-ignore lint/correctness/noUnusedVariables: Path parameters are intentionally extracted but not used
-        const { guildId, ...requestParams } = options || {};
-        const path = this.resolvePath('/guilds/{guild.id}', options);
+        const { guildId, ...requestParams } = options;
+
+        if (!guildId) {
+            throw new Error('guildId is required');
+        }
+        const path = this.resolvePath('/guilds/{guild.id}', { guildId });
         const response = await this.client.request({
             method: 'GET',
             url: path,
