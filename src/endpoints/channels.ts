@@ -1,7 +1,7 @@
 import type { AxiosInstance } from 'axios';
-import type { RESTGetAPIGuildResult } from 'discord-api-types/v10';
+import type { RESTGetAPIChannelResult } from 'discord-api-types/v10';
 
-export class GuildsEndpoints {
+export class ChannelsEndpoints {
     constructor(private client: AxiosInstance) {}
 
     private resolvePath(path: string, options?: Record<string, unknown>): string {
@@ -20,8 +20,8 @@ export class GuildsEndpoints {
         return resolvedPath;
     }
 
-    async getGuild(options?: { guildId: string; with_counts?: boolean }): Promise<RESTGetAPIGuildResult> {
-        const path = this.resolvePath('/guilds/{guild.id}', options);
+    async getChannel(options?: { channelId: string }): Promise<RESTGetAPIChannelResult> {
+        const path = this.resolvePath('/channels/{channel.id}', options);
         const response = await this.client.request({
             method: 'GET',
             url: path,
